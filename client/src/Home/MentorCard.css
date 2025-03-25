@@ -1,0 +1,187 @@
+.mentor-card {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e0e0e0;
+  border-radius: 16px;
+  padding: 20px;
+  margin: 20px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  max-width: 300px; /* Adjust as needed */
+  min-height: 320px; /* Ensure consistent height */
+  overflow: hidden; /* Ensure content doesn't overflow */
+}
+
+.mentor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.mentor-image-container {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 4px solid #4f46e5; /* Add a border to the image */
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2); /* Subtle shadow for depth */
+  margin: 0 auto 15px; /* Center the image */
+}
+
+.mentor-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mentor-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+  margin-bottom: 15px;
+}
+
+.expertise-tag {
+  display: inline-block;
+  background: linear-gradient(135deg, #edf2f7, #e2e8f0);
+  color: #4a5568;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
+}
+
+.expertise-tag:hover {
+  background: linear-gradient(135deg, #4f46e5, #3c35b5);
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.mentor-info {
+  flex-grow: 1; /* Allow content to grow and fill space */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Push button to the bottom */
+}
+
+.mentor-name {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: #2d3748; /* Darker text for better readability */
+  line-height: 1.2;
+  text-align: center;
+}
+
+.mentor-experience {
+  font-size: 0.9rem;
+  color: #718096; /* Lighter text for secondary information */
+  margin-bottom: 8px;
+  font-weight: 500;
+  text-align: center;
+}
+
+.mentor-bio {
+  font-size: 0.9rem;
+  color: #4a5568;
+  line-height: 1.4;
+  margin-bottom: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Limit bio to 3 lines */
+  -webkit-box-orient: vertical;
+  text-align: center;
+}
+
+.connect-button {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #4f46e5, #3c35b5);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.connect-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(79, 70, 229, 0.3);
+}
+
+.meeting-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.meeting-scheduled {
+  font-size: 0.9rem;
+  color: #38a169;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.view-details-button {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #38a169, #2f855a);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+  width: 100%;
+  text-align: center;
+}
+
+.view-details-button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 12px rgba(56, 161, 105, 0.3);
+}
+
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+@media (max-width: 768px) {
+  .mentor-card {
+    max-width: 100%;
+    min-height: auto; /* Allow height to adjust on mobile */
+  }
+
+  .mentor-name {
+    font-size: 1.3rem;
+  }
+
+  .mentor-bio {
+    font-size: 0.85rem;
+    -webkit-line-clamp: 2; /* Limit bio to 2 lines on mobile */
+  }
+}
+
+.mentor-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+

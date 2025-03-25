@@ -1,0 +1,221 @@
+.meeting-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+.meeting-dialog {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto; /* Enable scrolling */
+  position: relative;
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* Hide scrollbar for a cleaner look */
+.meeting-dialog::-webkit-scrollbar {
+  width: 0; /* Remove scrollbar width */
+  background: transparent; /* Make scrollbar transparent */
+}
+
+.meeting-dialog {
+  scrollbar-width: none; /* Firefox */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.meeting-dialog-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 25px;
+  border-bottom: 1px solid #e0e0e0;
+  background: linear-gradient(135deg, #4f46e5, #3c35b5);
+  border-radius: 12px 12px 0 0;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 1; /* Ensure header stays on top */
+}
+
+.meeting-dialog-header h2 {
+  color: white;
+  margin: 0 0 5px;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.mentor-expertise {
+  color: #f0f4ff;
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.meeting-form {
+  padding: 25px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  color: #4a5568;
+  font-weight: 500;
+}
+
+.form-group input[type="date"],
+.form-group input[type="time"],
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+  background-color: white;
+  color: black;
+}
+
+/* Custom styles for date and time input icons */
+.form-group input[type="date"]::-webkit-calendar-picker-indicator,
+.form-group input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  background-color: black;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 120px;
+}
+
+.form-group input[type="date"]:focus,
+.form-group input[type="time"]:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.meeting-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.cancel-button {
+  padding: 10px 20px;
+  background-color: #e2e8f0;
+  color: #4a5568;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background-color 0.2s;
+}
+
+.cancel-button:hover {
+  background-color: #cbd5e0;
+}
+
+.book-button {
+  padding: 10px 20px;
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: background-color 0.2s;
+}
+
+.book-button:hover {
+  background-color: #3c35b5;
+}
+
+.book-button:disabled {
+  background-color: #a3b1ff;
+  cursor: not-allowed;
+}
+
+.error-message {
+  background-color: #fed7d7;
+  color: #c53030;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+}
+
+.success-message {
+  padding: 30px 25px;
+  text-align: center;
+}
+
+.success-message h3 {
+  color: #38a169;
+  margin-bottom: 15px;
+  font-size: 1.3rem;
+}
+
+.success-message p {
+  color: #4a5568;
+  margin-bottom: 10px;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+  .meeting-dialog {
+    width: 95%;
+    max-height: 85vh;
+  }
+
+  .meeting-dialog-header h2 {
+    font-size: 1.3rem;
+  }
+
+  .form-group {
+    margin-bottom: 15px;
+  }
+
+  .meeting-actions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .cancel-button,
+  .book-button {
+    width: 100%;
+  }
+}
