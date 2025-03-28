@@ -54,13 +54,15 @@
 
 .meeting-info-section,
 .meeting-topic-section,
-.cancel-meeting-section {
+.cancel-meeting-section,
+.cancellation-reason-section {
   margin-bottom: 25px;
 }
 
 .meeting-info-section h3,
 .meeting-topic-section h3,
-.cancel-meeting-section h3 {
+.cancel-meeting-section h3,
+.cancellation-reason-section h3 {
   font-size: 1.2rem;
   margin-bottom: 15px;
   color: #2d3748;
@@ -90,7 +92,25 @@
   font-weight: 500;
 }
 
-.meeting-topic {
+.info-value.status-scheduled {
+  color: #10b981;
+}
+
+.info-value.status-pending {
+  color: #f59e0b;
+}
+
+.info-value.status-cancelled,
+.info-value.status-rejected {
+  color: #ef4444;
+}
+
+.info-value.status-completed {
+  color: #3b82f6;
+}
+
+.meeting-topic,
+.cancellation-reason {
   background-color: #f7fafc;
   padding: 15px;
   border-radius: 8px;
@@ -231,3 +251,4 @@
     font-size: 1.3rem;
   }
 }
+

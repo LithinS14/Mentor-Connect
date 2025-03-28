@@ -1,0 +1,259 @@
+.mentor-meeting-card {
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.mentor-meeting-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.mentor-meeting-card.pending {
+  border-left: 4px solid #f59e0b;
+}
+
+.mentor-meeting-card.past {
+  opacity: 0.8;
+}
+
+.meeting-header {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.student-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.student-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f46e5, #8864c6);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.student-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.status-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.status-badge.pending {
+  background-color: #fff7ed;
+  color: #f59e0b;
+}
+
+.status-badge.upcoming {
+  background-color: #ecfdf5;
+  color: #10b981;
+}
+
+.status-badge.completed {
+  background-color: #eff6ff;
+  color: #3b82f6;
+}
+
+.status-badge.cancelled {
+  background-color: #fef2f2;
+  color: #ef4444;
+}
+
+.meeting-details {
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.time-left {
+  grid-column: 1 / -1;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.detail-value {
+  font-size: 0.95rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.detail-value.highlight {
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+.meeting-topic {
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.meeting-topic h4 {
+  font-size: 0.95rem;
+  color: #4b5563;
+  margin-bottom: 8px;
+}
+
+.meeting-topic p {
+  font-size: 0.95rem;
+  color: #1f2937;
+  line-height: 1.5;
+}
+
+.student-background {
+  padding: 20px;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.student-background h4 {
+  font-size: 0.95rem;
+  color: #4b5563;
+  margin-bottom: 12px;
+}
+
+.background-details {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.background-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.background-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.background-value {
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.meeting-actions {
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.accept-btn,
+.reject-btn,
+.start-call-btn,
+.view-details-btn {
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: none;
+  flex: 1;
+  text-align: center;
+}
+
+.accept-btn {
+  background-color: #4f46e5;
+  color: white;
+}
+
+.accept-btn:hover {
+  background-color: #4338ca;
+}
+
+.reject-btn {
+  background-color: #f3f4f6;
+  color: #4b5563;
+}
+
+.reject-btn:hover {
+  background-color: #e5e7eb;
+}
+
+.start-call-btn {
+  background-color: #10b981;
+  color: white;
+}
+
+.start-call-btn:hover:not(:disabled) {
+  background-color: #059669;
+}
+
+.start-call-btn:disabled {
+  background-color: #d1fae5;
+  color: #065f46;
+  cursor: not-allowed;
+}
+
+.view-details-btn {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.view-details-btn:hover {
+  background-color: #2563eb;
+}
+
+.mentor-meeting-card.loading {
+  padding: 40px;
+  text-align: center;
+  color: #6b7280;
+}
+
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+}
+
+@media (max-width: 640px) {
+  .meeting-details,
+  .background-details {
+    grid-template-columns: 1fr;
+  }
+}
+

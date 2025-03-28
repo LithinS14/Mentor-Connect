@@ -23,7 +23,9 @@ const MentorAuth = () => {
 
       const data = await response.json()
       if (response.ok) {
-        // Redirect to MentorHome instead of showing an alert
+        // Store mentor ID in localStorage
+        localStorage.setItem("mentorId", data.mentorId)
+        // Redirect to MentorHome
         navigate("/mentor-home")
       } else {
         alert(data.error || "Sign in failed")

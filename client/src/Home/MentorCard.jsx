@@ -99,7 +99,13 @@ const MentorCard = ({ mentor }) => {
 
           {bookedMeeting ? (
             <div className="meeting-status">
-              <p className="meeting-scheduled">Meeting Scheduled</p>
+              <p className="meeting-scheduled">
+                {bookedMeeting.status === "cancelled"
+                  ? "Meeting Cancelled"
+                  : bookedMeeting.status === "completed"
+                    ? "Meeting Completed"
+                    : "Meeting Scheduled"}
+              </p>
               <button className="view-details-button" onClick={handleViewDetailsClick}>
                 View Details
               </button>
