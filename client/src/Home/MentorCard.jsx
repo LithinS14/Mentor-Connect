@@ -40,10 +40,13 @@ const MentorCard = ({ mentor }) => {
             if (data.meeting) {
               setBookedMeeting(data.meeting)
             }
+          } else {
+            console.log("No booked meetings found or error occurred")
           }
         }
       } catch (error) {
         console.error("Error fetching booked meetings:", error)
+        // Don't set error state to avoid disrupting the UI
       }
     }
 

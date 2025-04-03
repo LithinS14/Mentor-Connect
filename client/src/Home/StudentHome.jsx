@@ -71,30 +71,33 @@ const HomePage = () => {
         const response = await fetch(`http://localhost:5000/api/meetings/student/${studentId}/upcoming`, {
           credentials: "omit", // Don't send credentials
         })
-        if (!response.ok) {
-          throw new Error(`Failed to fetch upcoming meetings: ${response.status}`)
-        }
 
-        const data = await response.json()
+        // Only process if response is OK
+        if (response.ok) {
+          const data = await response.json()
 
-        if (data.meeting) {
-          setUpcomingMeeting(data.meeting)
+          if (data.meeting) {
+            setUpcomingMeeting(data.meeting)
 
-          // Check if meeting is within 30 minutes
-          const meetingTime = new Date(`${data.meeting.date}T${data.meeting.time}`)
-          const now = new Date()
-          const timeDiff = meetingTime - now
+            // Check if meeting is within 30 minutes
+            const meetingTime = new Date(`${data.meeting.date}T${data.meeting.time}`)
+            const now = new Date()
+            const timeDiff = meetingTime - now
 
-          // If meeting is within 30 minutes, show alert
-          if (timeDiff > 0 && timeDiff <= 30 * 60 * 1000) {
-            setShowMeetingAlert(true)
+            // If meeting is within 30 minutes, show alert
+            if (timeDiff > 0 && timeDiff <= 30 * 60 * 1000) {
+              setShowMeetingAlert(true)
+            }
+          } else {
+            setUpcomingMeeting(null)
+            setShowMeetingAlert(false)
           }
         } else {
-          setUpcomingMeeting(null)
-          setShowMeetingAlert(false)
+          console.log("Failed to fetch upcoming meetings:", response.status)
         }
       } catch (err) {
         console.error("Error checking upcoming meetings:", err)
+        // Don't set error state here to avoid disrupting the UI
       }
     }
 

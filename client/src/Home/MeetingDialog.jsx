@@ -1,3 +1,4 @@
+
 "use client"
 
 import { useState, useEffect } from "react"
@@ -12,18 +13,29 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(false)
   const [studentInfo, setStudentInfo] = useState(null)
+  const [minTime, setMinTime] = useState("")
+  const [currentDate, setCurrentDate] = useState("")
 
-  // Get student info from localStorage
+  // Get student info from localStorage and set up current date/time
   useEffect(() => {
     const studentId = localStorage.getItem("studentId")
     const studentEmail = localStorage.getItem("studentEmail")
     const studentProfileStr = localStorage.getItem("studentProfile")
 
+    // Set current date and time
+    const now = new Date()
+    const today = now.toISOString().split("T")[0]
+    setCurrentDate(today)
+
+    // Calculate minimum time (current time + 30 minutes)
+    const minTimeDate = new Date(now.getTime() + 30 * 60000)
+    const hours = minTimeDate.getHours().toString().padStart(2, "0")
+    const minutes = minTimeDate.getMinutes().toString().padStart(2, "0")
+    setMinTime(`${hours}:${minutes}`)
+
     if (studentProfileStr) {
-      // If we have the complete profile, use it
       setStudentInfo(JSON.parse(studentProfileStr))
     } else if (studentId && studentEmail) {
-      // If we only have ID and email, fetch the profile
       fetchStudentProfile(studentId)
     }
   }, [])
@@ -34,7 +46,6 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
       if (response.ok) {
         const data = await response.json()
         setStudentInfo(data)
-        // Store for future use
         localStorage.setItem("studentProfile", JSON.stringify(data))
       } else {
         console.error("Failed to fetch student profile")
@@ -44,15 +55,25 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
     }
   }
 
-  // Get tomorrow's date as the minimum selectable date
-  const tomorrow = new Date()
-  tomorrow.setDate(tomorrow.getDate() + 1)
-  const minDate = tomorrow.toISOString().split("T")[0]
-
+  // Get today's date as the minimum selectable date
+  const minDate = currentDate
   // Get date 30 days from now as the maximum selectable date
   const maxDate = new Date()
   maxDate.setDate(maxDate.getDate() + 30)
   const maxDateStr = maxDate.toISOString().split("T")[0]
+
+  const handleDateChange = (e) => {
+    const selectedDate = e.target.value
+    setMeetingDate(selectedDate)
+    
+    // If selected date is today, set the minimum time to current time + 30 minutes
+    if (selectedDate === currentDate) {
+      setMeetingTime("") // Reset time when date changes
+    } else {
+      // For future dates, no time restrictions
+      setMinTime("00:00")
+    }
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -60,7 +81,6 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
     setError(null)
 
     try {
-      // Check if student info is available
       if (!studentInfo) {
         throw new Error("Student information not available. Please log in again.")
       }
@@ -68,6 +88,17 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
       const studentId = localStorage.getItem("studentId")
       if (!studentId) {
         throw new Error("You must be logged in to book a meeting")
+      }
+
+      // Additional validation for same-day bookings
+      if (meetingDate === currentDate) {
+        const now = new Date()
+        const selectedDateTime = new Date(`${meetingDate}T${meetingTime}`)
+        const minBookingTime = new Date(now.getTime() + 30 * 60000) // Current time + 30 minutes
+        
+        if (selectedDateTime < minBookingTime) {
+          throw new Error("Please select a time at least 30 minutes from now")
+        }
       }
 
       const meetingData = {
@@ -93,9 +124,7 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
         throw new Error(data.error || "Failed to book meeting")
       }
 
-      setSuccess(true) // Show success message
-
-      // Notify parent component about the booked meeting
+      setSuccess(true)
       if (onMeetingBooked) {
         onMeetingBooked(data.meetingDetails)
       }
@@ -137,7 +166,7 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
                 type="date"
                 id="meeting-date"
                 value={meetingDate}
-                onChange={(e) => setMeetingDate(e.target.value)}
+                onChange={handleDateChange}
                 min={minDate}
                 max={maxDateStr}
                 required
@@ -151,8 +180,12 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
                 id="meeting-time"
                 value={meetingTime}
                 onChange={(e) => setMeetingTime(e.target.value)}
+                min={meetingDate === currentDate ? minTime : undefined}
                 required
               />
+              {meetingDate === currentDate && (
+                <p className="time-hint">Earliest available time: {minTime}</p>
+              )}
             </div>
 
             <div className="form-group">

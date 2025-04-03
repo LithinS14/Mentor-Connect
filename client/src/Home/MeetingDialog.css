@@ -18,19 +18,18 @@
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
-  overflow-y: auto; /* Enable scrolling */
+  overflow-y: auto;
   position: relative;
   animation: fadeIn 0.3s ease-out;
 }
 
-/* Hide scrollbar for a cleaner look */
 .meeting-dialog::-webkit-scrollbar {
-  width: 0; /* Remove scrollbar width */
-  background: transparent; /* Make scrollbar transparent */
+  width: 0;
+  background: transparent;
 }
 
 .meeting-dialog {
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: none;
 }
 
 @keyframes fadeIn {
@@ -55,7 +54,7 @@
   text-align: center;
   position: sticky;
   top: 0;
-  z-index: 1; /* Ensure header stays on top */
+  z-index: 1;
 }
 
 .meeting-dialog-header h2 {
@@ -101,7 +100,6 @@
   color: black;
 }
 
-/* Custom styles for date and time input icons */
 .form-group input[type="date"]::-webkit-calendar-picker-indicator,
 .form-group input[type="time"]::-webkit-calendar-picker-indicator {
   filter: invert(1);
@@ -193,6 +191,13 @@
   margin-bottom: 10px;
   font-size: 1rem;
   line-height: 1.5;
+}
+
+.time-hint {
+  font-size: 0.8rem;
+  color: #4a5568;
+  margin-top: 5px;
+  font-style: italic;
 }
 
 @media (max-width: 768px) {

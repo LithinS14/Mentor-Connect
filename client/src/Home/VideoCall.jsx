@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import AgoraRTC from "agora-rtc-sdk-ng"
-import AgoraRTM from "agora-rtm-sdk" // Import AgoraRTM
+// Remove the RTM import as we'll use a simpler approach for chat
 import "./VideoCall.css"
 
 const VideoCall = ({ meeting, onEndCall, isMentor }) => {
@@ -31,14 +31,21 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
   const channelName = `meeting_${meeting._id}`
 
   // Agora app ID - in a real app, this should be stored in environment variables
+  // Using a placeholder that will show a clear error message if not replaced
   const appId = "YOUR_AGORA_APP_ID" // Replace with your Agora App ID
+
+  // Add a useEffect to check if the appId is valid
+  useEffect(() => {
+    if (appId === "YOUR_AGORA_APP_ID") {
+      setError("Agora App ID not configured. Please set up a valid Agora App ID to enable video calls.")
+    }
+  }, [])
 
   useEffect(() => {
     // Initialize Agora client
     client.current = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
 
-    // Initialize RTM for chat
-    rtmClient.current = AgoraRTM.createInstance(appId)
+    // We'll use a simpler approach for chat without RTM
 
     // Set up event listeners
     setupEventListeners()
@@ -115,15 +122,6 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
       setRemoteUsers((prevUsers) => prevUsers.filter((u) => u.uid !== user.uid))
       addSystemMessage(`${user.uid} left the call`)
     })
-
-    // Set up RTM event listeners for chat
-    rtmClient.current.on("MessageFromPeer", ({ text }, peerId) => {
-      addMessage(peerId, text)
-    })
-
-    rtmChannel.current.on("ChannelMessage", ({ text }, memberId) => {
-      addMessage(memberId, text)
-    })
   }
 
   const joinCall = async () => {
@@ -132,11 +130,6 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
 
       // Generate a UID for the user
       const uid = isMentor ? `mentor_${meeting.mentorId}` : `student_${meeting.studentId}`
-
-      // Join the RTM channel for chat
-      await rtmClient.current.login({ uid })
-      rtmChannel.current = rtmClient.current.createChannel(channelName)
-      await rtmChannel.current.join()
 
       // Join the RTC channel for video
       await client.current.join(appId, channelName, null, uid)
@@ -181,15 +174,6 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
 
       // Leave the channel
       await client.current.leave()
-
-      // Leave RTM channel
-      if (rtmChannel.current) {
-        await rtmChannel.current.leave()
-      }
-
-      if (rtmClient.current) {
-        await rtmClient.current.logout()
-      }
 
       // Update meeting status if needed
       if (isMentor) {
@@ -275,10 +259,7 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
     if (!newMessage.trim()) return
 
     try {
-      // Send message to channel
-      await rtmChannel.current.sendMessage({ text: newMessage })
-
-      // Add message to local state
+      // Add message to local state only (no RTM)
       const userId = isMentor ? `mentor_${meeting.mentorId}` : `student_${meeting.studentId}`
       addMessage(userId, newMessage, true)
 

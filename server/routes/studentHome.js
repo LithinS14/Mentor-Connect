@@ -1,53 +1,69 @@
-const express = require("express");
-const router = express.Router();
-const Student = require("../models/Student");
-const Mentor = require("../models/Mentor");
-const nodemailer = require("nodemailer");
+const express = require("express")
+const router = express.Router()
+const Student = require("../models/Student")
+const Mentor = require("../models/Mentor")
+const nodemailer = require("nodemailer")
 
 // Fetch student data by ID
 router.get("/student/:id", async (req, res) => {
   try {
-    const student = await Student.findById(req.params.id);
+    const student = await Student.findById(req.params.id)
     if (!student) {
-      return res.status(404).json({ message: "Student not found" });
+      console.log(`Student not found with ID: ${req.params.id}`)
+      return res.status(404).json({ message: "Student not found" })
     }
-    res.json(student);
+
+    // Return student data without sensitive information
+    const safeStudentData = {
+      _id: student._id,
+      firstName: student.firstName,
+      lastName: student.lastName || "",
+      email: student.email,
+      age: student.age,
+      phoneNumber: student.phoneNumber,
+      educationLevel: student.educationLevel,
+      currentSchool: student.currentSchool,
+      goals: student.goals,
+      areasOfInterest: student.areasOfInterest,
+    }
+
+    res.json(safeStudentData)
   } catch (err) {
-    console.error(err); // Log the error for debugging
-    res.status(500).json({ message: err.message });
+    console.error(`Error fetching student with ID ${req.params.id}:`, err)
+    res.status(500).json({ message: err.message })
   }
-});
+})
 
 // Fetch all mentors
 router.get("/mentors", async (req, res) => {
   try {
-    const mentors = await Mentor.find();
-    res.json(mentors);
+    const mentors = await Mentor.find()
+    res.json(mentors)
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: err.message })
   }
-});
+})
 
 // Book a meeting with a mentor
 router.post("/book-meeting", async (req, res) => {
   try {
-    const { mentorId, studentId, meetingDetails } = req.body;
+    const { mentorId, studentId, meetingDetails } = req.body
 
     // Validate required fields
     if (!mentorId || !studentId || !meetingDetails) {
-      return res.status(400).json({ message: "Missing required fields" });
+      return res.status(400).json({ message: "Missing required fields" })
     }
 
     // Fetch mentor and student from database
-    const mentor = await Mentor.findById(mentorId);
-    const student = await Student.findById(studentId);
+    const mentor = await Mentor.findById(mentorId)
+    const student = await Student.findById(studentId)
 
     if (!mentor) {
-      return res.status(404).json({ message: "Mentor not found" });
+      return res.status(404).json({ message: "Mentor not found" })
     }
 
     if (!student) {
-      return res.status(404).json({ message: "Student not found" });
+      return res.status(404).json({ message: "Student not found" })
     }
 
     // Create email transporter
@@ -57,7 +73,7 @@ router.post("/book-meeting", async (req, res) => {
         user: process.env.EMAIL_USER, // Add this to your .env file
         pass: process.env.EMAIL_PASSWORD, // Add this to your .env file
       },
-    });
+    })
 
     // Create student details object (excluding password and email)
     const studentDetails = {
@@ -68,11 +84,11 @@ router.post("/book-meeting", async (req, res) => {
       currentSchool: student.currentSchool,
       goals: student.goals,
       areasOfInterest: student.areasOfInterest,
-    };
+    }
 
     // Format date and time for email
-    const formattedDate = new Date(meetingDetails.date).toLocaleDateString();
-    const formattedTime = meetingDetails.time;
+    const formattedDate = new Date(meetingDetails.date).toLocaleDateString()
+    const formattedTime = meetingDetails.time
 
     // Send email to mentor
     const mentorMailOptions = {
@@ -106,7 +122,7 @@ router.post("/book-meeting", async (req, res) => {
         
         <p>Please respond to the student to confirm this meeting.</p>
       `,
-    };
+    }
 
     // Send email to student
     const studentMailOptions = {
@@ -133,27 +149,28 @@ router.post("/book-meeting", async (req, res) => {
           <li><strong>Expertise:</strong> ${mentor.areasOfInterest ? mentor.areasOfInterest.join(", ") : "Various fields"}</li>
         </ul>
       `,
-    };
+    }
 
     // Send emails
-    await transporter.sendMail(mentorMailOptions);
-    await transporter.sendMail(studentMailOptions);
+    await transporter.sendMail(mentorMailOptions)
+    await transporter.sendMail(studentMailOptions)
 
     // Return success response
-    res.status(200).json({ 
+    res.status(200).json({
       message: "Meeting request sent successfully",
       meetingDetails: {
         mentor: `${mentor.firstName} ${mentor.lastName}`,
         date: formattedDate,
         time: formattedTime,
         duration: meetingDetails.duration,
-        topic: meetingDetails.topic
-      }
-    });
+        topic: meetingDetails.topic,
+      },
+    })
   } catch (err) {
-    console.error("Error booking meeting:", err);
-    res.status(500).json({ message: err.message });
+    console.error("Error booking meeting:", err)
+    res.status(500).json({ message: err.message })
   }
-});
+})
 
-module.exports = router;
+module.exports = router
+
