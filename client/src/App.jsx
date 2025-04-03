@@ -6,21 +6,24 @@ import MentorAuth from "./auth/MentorAuth"
 import StudentHome from "./Home/StudentHome"
 import MentorHome from ".//Home/MentorHome"
 import "./App.css"
+import ErrorBoundary from "./Home/ErrorBoundary"
 
 const App = () => {
   return (
-    <Router>
-      <div className="app">
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/user-selection" element={<UserSelection />} />
-          <Route path="/student" element={<StudentAuth />} />
-          <Route path="/mentor" element={<MentorAuth />} />
-          <Route path="/student-home" element={<StudentHome/>} />
-          <Route path="/mentor-home" element={<MentorHome />} />
-        </Routes>
-      </div>
-    </Router>
+    <ErrorBoundary>
+      <Router>
+        <div className="app">
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/user-selection" element={<UserSelection />} />
+            <Route path="/student" element={<StudentAuth />} />
+            <Route path="/mentor" element={<MentorAuth />} />
+            <Route path="/student-home" element={<StudentHome />} />
+            <Route path="/mentor-home" element={<MentorHome />} />
+          </Routes>
+        </div>
+      </Router>
+    </ErrorBoundary>
   )
 }
 

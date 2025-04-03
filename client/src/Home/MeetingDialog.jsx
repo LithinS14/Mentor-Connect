@@ -1,8 +1,8 @@
-
 "use client"
 
 import { useState, useEffect } from "react"
 import "./MeetingDialog.css"
+import "./ErrorStyles.css"
 
 const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
   const [meetingDate, setMeetingDate] = useState("")
@@ -65,7 +65,7 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
   const handleDateChange = (e) => {
     const selectedDate = e.target.value
     setMeetingDate(selectedDate)
-    
+
     // If selected date is today, set the minimum time to current time + 30 minutes
     if (selectedDate === currentDate) {
       setMeetingTime("") // Reset time when date changes
@@ -95,9 +95,11 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
         const now = new Date()
         const selectedDateTime = new Date(`${meetingDate}T${meetingTime}`)
         const minBookingTime = new Date(now.getTime() + 30 * 60000) // Current time + 30 minutes
-        
+
         if (selectedDateTime < minBookingTime) {
-          throw new Error("Please select a time at least 30 minutes from now")
+          setError("Please select a time at least 30 minutes from now")
+          setIsSubmitting(false)
+          return
         }
       }
 
@@ -148,7 +150,11 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
 
         {success ? (
           <div className="success-message">
-            <button className="close-button" onClick={() => setSuccess(false)} style={{ float: "right", background: "none", border: "none", fontSize: "1.5rem", cursor: "pointer" }}>
+            <button
+              className="close-button"
+              onClick={() => setSuccess(false)}
+              style={{ float: "right", background: "none", border: "none", fontSize: "1.5rem", cursor: "pointer" }}
+            >
               ×
             </button>
             <h3>Meeting Booked Successfully!</h3>
@@ -184,7 +190,9 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
                 required
               />
               {meetingDate === currentDate && (
-                <p className="time-hint">Earliest available time: {minTime}</p>
+                <p className="time-hint">
+                  <strong>Note:</strong> Earliest available time: {minTime} (30 minutes from now)
+                </p>
               )}
             </div>
 
@@ -232,3 +240,4 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
 }
 
 export default MeetingDialog
+

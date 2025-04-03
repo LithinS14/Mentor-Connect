@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react"
 import AgoraRTC from "agora-rtc-sdk-ng"
-// Remove the RTM import as we'll use a simpler approach for chat
 import "./VideoCall.css"
 
 const VideoCall = ({ meeting, onEndCall, isMentor }) => {
@@ -20,32 +19,55 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
   const [isCallConnected, setIsCallConnected] = useState(false)
   const [isJoining, setIsJoining] = useState(true)
   const [error, setError] = useState(null)
+  const [permissionsChecked, setPermissionsChecked] = useState(false)
+  const [hasPermissions, setHasPermissions] = useState(false)
 
   const client = useRef(null)
   const localVideoRef = useRef(null)
   const messagesEndRef = useRef(null)
-  const rtmClient = useRef(null)
-  const rtmChannel = useRef(null)
+  const timerIntervalRef = useRef(null)
 
   // Generate a unique channel name based on the meeting ID
   const channelName = `meeting_${meeting._id}`
 
   // Agora app ID - in a real app, this should be stored in environment variables
   // Using a placeholder that will show a clear error message if not replaced
-  const appId = "YOUR_AGORA_APP_ID" // Replace with your Agora App ID
+  const appId = process.env.REACT_APP_AGORA_APP_ID || "YOUR_AGORA_APP_ID"
 
-  // Add a useEffect to check if the appId is valid
+  // Check for media permissions
   useEffect(() => {
-    if (appId === "YOUR_AGORA_APP_ID") {
-      setError("Agora App ID not configured. Please set up a valid Agora App ID to enable video calls.")
+    const checkPermissions = async () => {
+      try {
+        // Check if we can access camera and microphone
+        await navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+        setHasPermissions(true)
+      } catch (err) {
+        console.error("Media permissions error:", err)
+        setHasPermissions(false)
+        setError(`Media permissions denied: ${err.message}. Please allow camera and microphone access.`)
+      } finally {
+        setPermissionsChecked(true)
+      }
     }
+
+    checkPermissions()
   }, [])
 
+  // Check if Agora App ID is valid
   useEffect(() => {
+    if (appId === "YOUR_AGORA_APP_ID") {
+      setError("Video calls are currently disabled. Please contact the administrator to enable this feature.")
+    }
+  }, [appId])
+
+  // Initialize Agora client and join call
+  useEffect(() => {
+    if (!permissionsChecked || !hasPermissions || appId === "YOUR_AGORA_APP_ID") {
+      return // Don't proceed if permissions aren't granted or App ID is invalid
+    }
+
     // Initialize Agora client
     client.current = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" })
-
-    // We'll use a simpler approach for chat without RTM
 
     // Set up event listeners
     setupEventListeners()
@@ -57,16 +79,18 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
     fetchParticipantInfo()
 
     // Start call timer
-    const timerInterval = setInterval(() => {
+    timerIntervalRef.current = setInterval(() => {
       setCallTime((prevTime) => prevTime + 1)
     }, 1000)
 
     // Clean up on component unmount
     return () => {
       leaveCall()
-      clearInterval(timerInterval)
+      if (timerIntervalRef.current) {
+        clearInterval(timerIntervalRef.current)
+      }
     }
-  }, [])
+  }, [permissionsChecked, hasPermissions])
 
   useEffect(() => {
     // Scroll to bottom of chat when new messages arrive
@@ -84,29 +108,47 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
       if (response.ok) {
         const data = await response.json()
         setParticipantInfo(data)
+      } else {
+        // Create fallback participant info
+        setParticipantInfo({
+          firstName: isMentor ? "Student" : "Mentor",
+          lastName: "",
+        })
       }
     } catch (error) {
       console.error("Error fetching participant info:", error)
+      // Create fallback participant info
+      setParticipantInfo({
+        firstName: isMentor ? "Student" : "Mentor",
+        lastName: "",
+      })
     }
   }
 
   const setupEventListeners = () => {
+    if (!client.current) return
+
     // Handle user published events (when remote user publishes audio/video)
     client.current.on("user-published", async (user, mediaType) => {
-      await client.current.subscribe(user, mediaType)
+      try {
+        await client.current.subscribe(user, mediaType)
 
-      if (mediaType === "video") {
-        setRemoteUsers((prevUsers) => {
-          if (prevUsers.find((u) => u.uid === user.uid)) {
-            return prevUsers.map((u) => (u.uid === user.uid ? user : u))
-          } else {
-            return [...prevUsers, user]
-          }
-        })
-      }
+        if (mediaType === "video") {
+          setRemoteUsers((prevUsers) => {
+            if (prevUsers.find((u) => u.uid === user.uid)) {
+              return prevUsers.map((u) => (u.uid === user.uid ? user : u))
+            } else {
+              return [...prevUsers, user]
+            }
+          })
+        }
 
-      if (mediaType === "audio") {
-        user.audioTrack.play()
+        if (mediaType === "audio") {
+          user.audioTrack.play()
+        }
+      } catch (err) {
+        console.error("Error subscribing to remote user:", err)
+        addSystemMessage(`Failed to connect to remote user: ${err.message}`)
       }
     })
 
@@ -122,11 +164,26 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
       setRemoteUsers((prevUsers) => prevUsers.filter((u) => u.uid !== user.uid))
       addSystemMessage(`${user.uid} left the call`)
     })
+
+    // Handle connection state changes
+    client.current.on("connection-state-change", (curState, prevState) => {
+      console.log(`Connection state changed from ${prevState} to ${curState}`)
+      if (curState === "DISCONNECTED") {
+        addSystemMessage("You were disconnected. Attempting to reconnect...")
+      } else if (curState === "CONNECTED") {
+        addSystemMessage("Connection established")
+      }
+    })
   }
 
   const joinCall = async () => {
     try {
       setIsJoining(true)
+
+      // Check if appId is valid before proceeding
+      if (appId === "YOUR_AGORA_APP_ID") {
+        throw new Error("Agora App ID not configured. Please set up a valid Agora App ID to enable video calls.")
+      }
 
       // Generate a UID for the user
       const uid = isMentor ? `mentor_${meeting.mentorId}` : `student_${meeting.studentId}`
@@ -134,25 +191,59 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
       // Join the RTC channel for video
       await client.current.join(appId, channelName, null, uid)
 
-      // Create and publish local tracks
-      const [audioTrack, videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks()
+      // Create and publish local tracks with error handling
+      try {
+        const [audioTrack, videoTrack] = await AgoraRTC.createMicrophoneAndCameraTracks(
+          {
+            encoderConfig: "standard",
+            AEC: true,
+            AGC: true,
+            ANS: true,
+          },
+          {
+            encoderConfig: "standard",
+            facingMode: "user",
+          },
+        )
 
-      setLocalAudioTrack(audioTrack)
-      setLocalVideoTrack(videoTrack)
+        setLocalAudioTrack(audioTrack)
+        setLocalVideoTrack(videoTrack)
 
-      await client.current.publish([audioTrack, videoTrack])
+        await client.current.publish([audioTrack, videoTrack])
 
-      // Play local video track
-      videoTrack.play(localVideoRef.current)
+        // Play local video track
+        videoTrack.play(localVideoRef.current)
 
-      setIsCallConnected(true)
-      setIsJoining(false)
+        setIsCallConnected(true)
+        setIsJoining(false)
 
-      // Add system message
-      addSystemMessage("You joined the call")
+        // Add system message
+        addSystemMessage("You joined the call")
+      } catch (trackError) {
+        console.error("Error creating local tracks:", trackError)
+
+        // Try to join with just audio if video fails
+        if (trackError.message.includes("video")) {
+          try {
+            const audioTrack = await AgoraRTC.createMicrophoneAudioTrack()
+            setLocalAudioTrack(audioTrack)
+            await client.current.publish([audioTrack])
+
+            setIsCallConnected(true)
+            setIsJoining(false)
+            setIsVideoOff(true)
+
+            addSystemMessage("Joined with audio only. Video is unavailable.")
+          } catch (audioError) {
+            throw new Error(`Could not access microphone: ${audioError.message}`)
+          }
+        } else {
+          throw trackError
+        }
+      }
     } catch (error) {
       console.error("Error joining call:", error)
-      setError("Failed to join the call. Please check your camera and microphone permissions.")
+      setError(error.message || "Failed to join the call. Please check your camera and microphone permissions.")
       setIsJoining(false)
     }
   }
@@ -161,19 +252,22 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
     try {
       // Unpublish and close local tracks
       if (localAudioTrack) {
+        await client.current?.unpublish(localAudioTrack)
         localAudioTrack.close()
       }
 
       if (localVideoTrack) {
+        await client.current?.unpublish(localVideoTrack)
         localVideoTrack.close()
       }
 
       if (screenTrack) {
+        await client.current?.unpublish(screenTrack)
         screenTrack.close()
       }
 
       // Leave the channel
-      await client.current.leave()
+      await client.current?.leave()
 
       // Update meeting status if needed
       if (isMentor) {
@@ -199,38 +293,47 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
 
   const toggleAudio = async () => {
     if (localAudioTrack) {
-      if (isAudioMuted) {
-        await localAudioTrack.setEnabled(true)
-      } else {
-        await localAudioTrack.setEnabled(false)
+      try {
+        await localAudioTrack.setEnabled(!isAudioMuted)
+        setIsAudioMuted(!isAudioMuted)
+      } catch (err) {
+        console.error("Error toggling audio:", err)
+        addSystemMessage(`Failed to ${isAudioMuted ? "unmute" : "mute"}: ${err.message}`)
       }
-      setIsAudioMuted(!isAudioMuted)
     }
   }
 
   const toggleVideo = async () => {
     if (localVideoTrack) {
-      if (isVideoOff) {
-        await localVideoTrack.setEnabled(true)
-      } else {
-        await localVideoTrack.setEnabled(false)
+      try {
+        await localVideoTrack.setEnabled(!isVideoOff)
+        setIsVideoOff(!isVideoOff)
+      } catch (err) {
+        console.error("Error toggling video:", err)
+        addSystemMessage(`Failed to ${isVideoOff ? "start" : "stop"} video: ${err.message}`)
       }
-      setIsVideoOff(!isVideoOff)
     }
   }
 
   const toggleScreenSharing = async () => {
     if (isScreenSharing) {
-      // Stop screen sharing
-      if (screenTrack) {
-        await client.current.unpublish(screenTrack)
-        screenTrack.close()
-        setScreenTrack(null)
-      }
+      try {
+        // Stop screen sharing
+        if (screenTrack) {
+          await client.current.unpublish(screenTrack)
+          screenTrack.close()
+          setScreenTrack(null)
+        }
 
-      // Republish video track
-      if (localVideoTrack) {
-        await client.current.publish(localVideoTrack)
+        // Republish video track
+        if (localVideoTrack) {
+          await client.current.publish(localVideoTrack)
+        }
+
+        setIsScreenSharing(false)
+      } catch (err) {
+        console.error("Error stopping screen sharing:", err)
+        addSystemMessage(`Failed to stop screen sharing: ${err.message}`)
       }
     } else {
       try {
@@ -245,14 +348,19 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
         // Publish screen track
         await client.current.publish(tempScreenTrack)
 
+        // Handle screen share stopped by user through browser UI
+        tempScreenTrack.on("track-ended", () => {
+          toggleScreenSharing()
+        })
+
         setScreenTrack(tempScreenTrack)
+        setIsScreenSharing(true)
       } catch (error) {
         console.error("Error sharing screen:", error)
+        addSystemMessage(`Failed to share screen: ${error.message}`)
         return
       }
     }
-
-    setIsScreenSharing(!isScreenSharing)
   }
 
   const sendMessage = async () => {
@@ -320,6 +428,13 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
     }
   }
 
+  const retryJoinCall = () => {
+    setError(null)
+    setIsJoining(true)
+    joinCall()
+  }
+
+  // Render error state
   if (error) {
     return (
       <div className="video-call-error">
@@ -327,7 +442,7 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
           <h2>Connection Error</h2>
           <p>{error}</p>
           <div className="error-actions">
-            <button onClick={joinCall}>Try Again</button>
+            <button onClick={retryJoinCall}>Try Again</button>
             <button onClick={onEndCall}>Return to Dashboard</button>
           </div>
         </div>
@@ -335,6 +450,7 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
     )
   }
 
+  // Render loading state
   if (isJoining) {
     return (
       <div className="video-call-loading">
@@ -347,6 +463,64 @@ const VideoCall = ({ meeting, onEndCall, isMentor }) => {
     )
   }
 
+  // Render fallback UI if Agora isn't available
+  if (appId === "YOUR_AGORA_APP_ID") {
+    return (
+      <div className="video-call-container">
+        <div className="video-call-header">
+          <div className="call-info">
+            <h2>
+              {isMentor
+                ? `Call with ${participantInfo ? participantInfo.firstName : "Student"}`
+                : `Call with ${participantInfo ? participantInfo.firstName : "Mentor"}`}
+            </h2>
+            <div className="call-timer">{formatTime(callTime)}</div>
+          </div>
+          <button
+            className="end-call-button"
+            onClick={() => {
+              onEndCall()
+            }}
+          >
+            End Call
+          </button>
+        </div>
+
+        <div className="video-call-content" style={{ justifyContent: "center", alignItems: "center" }}>
+          <div style={{ textAlign: "center", maxWidth: "600px", padding: "20px" }}>
+            <h2>Video Call Not Available</h2>
+            <p>The video call feature requires an Agora App ID to be configured.</p>
+            <p>Please contact the administrator to set up video calling.</p>
+            <p>You can still use the chat feature below to communicate.</p>
+          </div>
+        </div>
+
+        <div className="chat-container" style={{ width: "100%", maxWidth: "600px", margin: "0 auto" }}>
+          <div className="chat-header">
+            <h3>Chat</h3>
+          </div>
+          <div className="chat-messages">
+            <div className="chat-message system">
+              <div className="message-content">Welcome to the chat. Video calling is not available at this time.</div>
+            </div>
+            <div ref={messagesEndRef} />
+          </div>
+          <div className="chat-input">
+            <input
+              type="text"
+              placeholder="Type a message..."
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && sendMessage()}
+            />
+            <button onClick={sendMessage}>Send</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Main UI
   return (
     <div className="video-call-container">
       <div className="video-call-header">

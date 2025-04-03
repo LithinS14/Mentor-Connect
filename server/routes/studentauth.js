@@ -56,6 +56,11 @@ router.post("/signin", async (req, res) => {
   const { email, password } = req.body
 
   try {
+    // Validate input
+    if (!email || !password) {
+      return res.status(400).json({ error: "Email and password are required" })
+    }
+
     const student = await Student.findOne({ email })
 
     if (!student) {
@@ -73,7 +78,8 @@ router.post("/signin", async (req, res) => {
       studentId: student._id, // Return the student ID
     })
   } catch (err) {
-    res.status(400).json({ error: err.message })
+    console.error("Error in student signin:", err)
+    res.status(500).json({ error: "Server error during sign in" })
   }
 })
 

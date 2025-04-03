@@ -75,6 +75,11 @@ router.get("/student/:studentId/mentor/:mentorId", async (req, res) => {
   try {
     const { studentId, mentorId } = req.params
 
+    // Validate IDs
+    if (!studentId || !mentorId) {
+      return res.status(400).json({ error: "Student ID and Mentor ID are required" })
+    }
+
     const meeting = await Meeting.findOne({
       studentId,
       mentorId,
@@ -93,11 +98,22 @@ router.get("/student/:studentId/upcoming", async (req, res) => {
   try {
     const { studentId } = req.params
 
+    if (!studentId) {
+      return res.status(400).json({ error: "Student ID is required" })
+    }
+
     // Find the next upcoming meeting for this student
     const meeting = await Meeting.findOne({
       studentId,
       status: "scheduled",
-      date: { $gte: new Date().toISOString().split("T")[0] }, // Date is today or in the future
+      // Use a more reliable date comparison
+      $or: [
+        { date: { $gt: new Date().toISOString().split("T")[0] } }, // Future date
+        {
+          date: new Date().toISOString().split("T")[0], // Today
+          time: { $gt: new Date().toTimeString().split(" ")[0].substring(0, 5) }, // Current time (HH:MM)
+        },
+      ],
     }).sort({ date: 1, time: 1 }) // Sort by date and time ascending
 
     if (!meeting) {

@@ -28,8 +28,12 @@ const MentorHome = () => {
       return
     }
 
+    let isMounted = true
+    let fetchTimeout = null
+
     const fetchData = async () => {
       try {
+        if (!isMounted) return
         setLoading(true)
 
         // Fetch mentor info
@@ -37,6 +41,8 @@ const MentorHome = () => {
         const mentorResponse = await fetch(`http://localhost:5000/api/mentor/${mentorId}`, {
           credentials: "omit", // Don't send credentials
         })
+
+        if (!isMounted) return
 
         if (!mentorResponse.ok) {
           console.error("Failed to fetch mentor:", mentorResponse.status, mentorResponse.statusText)
@@ -51,6 +57,8 @@ const MentorHome = () => {
         const meetingsResponse = await fetch(`http://localhost:5000/api/meetings/mentor/${mentorId}`, {
           credentials: "omit", // Don't send credentials
         })
+
+        if (!isMounted) return
 
         if (!meetingsResponse.ok) {
           console.error("Failed to fetch meetings:", meetingsResponse.status, meetingsResponse.statusText)
@@ -68,7 +76,8 @@ const MentorHome = () => {
 
         if (meetingsData.meetings && meetingsData.meetings.length > 0) {
           meetingsData.meetings.forEach((meeting) => {
-            const meetingDate = new Date(meeting.date)
+            // Parse meeting date and time to create a Date object
+            const meetingDateTime = new Date(`${meeting.date}T${meeting.time}`)
 
             if (meeting.status === "pending") {
               pending.push(meeting)
@@ -78,9 +87,11 @@ const MentorHome = () => {
               meeting.status === "rejected"
             ) {
               completed.push(meeting)
-            } else if (meetingDate > now) {
+            } else if (meetingDateTime > now) {
+              // Only consider it upcoming if the meeting time is in the future
               upcoming.push(meeting)
             } else {
+              // If meeting time has passed but status is still "scheduled"
               completed.push(meeting)
             }
           })
@@ -91,18 +102,30 @@ const MentorHome = () => {
         setCompletedMeetings(completed)
         setError(null)
       } catch (err) {
+        if (!isMounted) return
         console.error("Error fetching data:", err)
         setError("Failed to load data. Please try again.")
       } finally {
-        setLoading(false)
+        if (isMounted) {
+          setLoading(false)
+          // Schedule next refresh after a reasonable delay (5 minutes)
+          fetchTimeout = setTimeout(
+            () => {
+              if (isMounted) fetchData()
+            },
+            5 * 60 * 1000,
+          )
+        }
       }
     }
 
     fetchData()
 
-    // Set up interval to refresh data every minute
-    const intervalId = setInterval(fetchData, 60000)
-    return () => clearInterval(intervalId)
+    // Clean up function
+    return () => {
+      isMounted = false
+      if (fetchTimeout) clearTimeout(fetchTimeout)
+    }
   }, [navigate])
 
   const handleAcceptMeeting = async (meetingId) => {

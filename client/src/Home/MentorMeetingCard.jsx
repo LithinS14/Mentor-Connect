@@ -12,20 +12,68 @@ const MentorMeetingCard = ({ meeting, onAccept, onReject, onStartCall, isPending
   const [mentor, setMentor] = useState(null)
 
   useEffect(() => {
+    let isMounted = true
     const fetchStudent = async () => {
       try {
+        // Check if we already tried to fetch this student
+        const cachedStudent = localStorage.getItem(`student_${meeting.studentId}`)
+        if (cachedStudent) {
+          setStudent(JSON.parse(cachedStudent))
+          return
+        }
+
         const response = await fetch(`http://localhost:5000/api/studentHome/student/${meeting.studentId}`, {
           credentials: "omit", // Don't send credentials
         })
+
+        if (!isMounted) return
+
         if (response.ok) {
           const data = await response.json()
           setStudent(data)
+          // Cache the student data to prevent repeated requests
+          localStorage.setItem(`student_${meeting.studentId}`, JSON.stringify(data))
+        } else {
+          console.warn(`Could not fetch student with ID: ${meeting.studentId}. Using fallback data.`)
+          const fallbackStudent = {
+            _id: meeting.studentId,
+            firstName: meeting.studentName || "Student",
+            lastName: "",
+            educationLevel: "Not available",
+            currentSchool: "Not available",
+            areasOfInterest: ["Not available"],
+          }
+          setStudent(fallbackStudent)
+          // Cache the fallback data to prevent repeated requests
+          localStorage.setItem(`student_${meeting.studentId}`, JSON.stringify(fallbackStudent))
         }
       } catch (error) {
+        if (!isMounted) return
+
         console.error("Error fetching student:", error)
+        // Set fallback student data
+        const fallbackStudent = {
+          _id: meeting.studentId,
+          firstName: meeting.studentName || "Student",
+          lastName: "",
+          educationLevel: "Not available",
+          currentSchool: "Not available",
+          areasOfInterest: ["Not available"],
+        }
+        setStudent(fallbackStudent)
+        // Cache the fallback data to prevent repeated requests
+        localStorage.setItem(`student_${meeting.studentId}`, JSON.stringify(fallbackStudent))
       }
     }
 
+    fetchStudent()
+
+    return () => {
+      isMounted = false
+    }
+  }, [meeting.studentId, meeting.studentName])
+
+  useEffect(() => {
     const fetchMentor = async () => {
       try {
         const response = await fetch(`http://localhost:5000/api/mentor/${meeting.mentorId}`, {
@@ -40,9 +88,8 @@ const MentorMeetingCard = ({ meeting, onAccept, onReject, onStartCall, isPending
       }
     }
 
-    fetchStudent()
     fetchMentor()
-  }, [meeting.studentId, meeting.mentorId])
+  }, [meeting.mentorId])
 
   useEffect(() => {
     if (!isUpcoming) return

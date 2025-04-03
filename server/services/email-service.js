@@ -1,8 +1,14 @@
 // Backend service for sending emails
 const nodemailer = require("nodemailer")
 
-// Create a transporter object
+// Create a transporter object with fallback
 const createTransporter = () => {
+  // Check if email credentials are available
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
+    console.warn("Email credentials not set. Email functionality will be disabled.")
+    return null
+  }
+
   return nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -12,10 +18,25 @@ const createTransporter = () => {
   })
 }
 
+// Safe email sending function with error handling
+const safeEmailSend = async (mailOptions) => {
+  const transporter = createTransporter()
+  if (!transporter) {
+    console.log("Email sending skipped: No email credentials")
+    return false
+  }
+
+  try {
+    await transporter.sendMail(mailOptions)
+    return true
+  } catch (error) {
+    console.error("Failed to send email:", error)
+    return false
+  }
+}
+
 // Send email to mentor
 const sendMentorEmail = async (mentor, student, meetingDetails) => {
-  const transporter = createTransporter()
-
   // Format date and time for email
   const formattedDate = new Date(meetingDetails.date).toLocaleDateString()
 
@@ -63,13 +84,11 @@ const sendMentorEmail = async (mentor, student, meetingDetails) => {
     `,
   }
 
-  return transporter.sendMail(mailOptions)
+  return safeEmailSend(mailOptions)
 }
 
 // Send email to student
 const sendStudentEmail = async (student, mentor, meetingDetails) => {
-  const transporter = createTransporter()
-
   // Format date and time for email
   const formattedDate = new Date(meetingDetails.date).toLocaleDateString()
 
@@ -99,11 +118,12 @@ const sendStudentEmail = async (student, mentor, meetingDetails) => {
     `,
   }
 
-  return transporter.sendMail(mailOptions)
+  return safeEmailSend(mailOptions)
 }
 
 module.exports = {
   sendMentorEmail,
   sendStudentEmail,
+  safeEmailSend,
 }
 
