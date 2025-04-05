@@ -189,6 +189,9 @@ const HomePage = () => {
                   <span className="meeting-date">{new Date(upcomingMeeting.date).toLocaleDateString()}</span> at{" "}
                   <span className="meeting-time">{upcomingMeeting.time}</span>
                 </p>
+                <button className="join-meeting-button" onClick={() => handleJoinCall(upcomingMeeting)}>
+                  Join Meeting Now
+                </button>
               </div>
               <div className="meeting-countdown" id="meeting-countdown">
                 <UpcomingMeetingTimer meeting={upcomingMeeting} onJoin={handleJoinCall} />

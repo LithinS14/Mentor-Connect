@@ -122,12 +122,8 @@ const MentorMeetingCard = ({ meeting, onAccept, onReject, onStartCall, isPending
 
       setTimeLeft(timeLeftStr)
 
-      // Enable start call button if meeting is within 15 minutes
-      if (difference <= 15 * 60 * 1000) {
-        setCanStartCall(true)
-      } else {
-        setCanStartCall(false)
-      }
+      // Enable start call button for all upcoming meetings (for demo purposes)
+      setCanStartCall(true)
     }
 
     calculateTimeLeft()

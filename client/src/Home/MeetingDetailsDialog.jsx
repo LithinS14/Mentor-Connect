@@ -193,7 +193,7 @@ const MeetingDetailsDialog = ({ meeting = {}, mentor = {}, onClose, onMeetingCan
               </button>
               {(meeting.status === "scheduled" || meeting.status === "pending") && (
                 <button className="show-cancel-form-button" onClick={() => setShowCancelForm(true)}>
-                  Cancel Meeting
+                  <span className="cancel-icon">✕</span> Cancel Meeting
                 </button>
               )}
             </div>

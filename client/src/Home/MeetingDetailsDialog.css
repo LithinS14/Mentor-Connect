@@ -209,11 +209,20 @@
   cursor: pointer;
   font-weight: 600;
   font-size: 0.95rem;
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .show-cancel-form-button:hover {
   background-color: #f56565;
+  transform: translateY(-2px);
+}
+
+.cancel-icon {
+  font-size: 1.2rem;
+  font-weight: bold;
 }
 
 .cancel-meeting-button {

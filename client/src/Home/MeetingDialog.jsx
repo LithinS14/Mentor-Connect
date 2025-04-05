@@ -27,8 +27,8 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
     const today = now.toISOString().split("T")[0]
     setCurrentDate(today)
 
-    // Calculate minimum time (current time + 30 minutes)
-    const minTimeDate = new Date(now.getTime() + 30 * 60000)
+    // Calculate minimum time (current time + 10 minutes)
+    const minTimeDate = new Date(now.getTime() + 10 * 60000)
     const hours = minTimeDate.getHours().toString().padStart(2, "0")
     const minutes = minTimeDate.getMinutes().toString().padStart(2, "0")
     setMinTime(`${hours}:${minutes}`)
@@ -66,7 +66,7 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
     const selectedDate = e.target.value
     setMeetingDate(selectedDate)
 
-    // If selected date is today, set the minimum time to current time + 30 minutes
+    // If selected date is today, set the minimum time to current time + 10 minutes
     if (selectedDate === currentDate) {
       setMeetingTime("") // Reset time when date changes
     } else {
@@ -94,12 +94,10 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
       if (meetingDate === currentDate) {
         const now = new Date()
         const selectedDateTime = new Date(`${meetingDate}T${meetingTime}`)
-        const minBookingTime = new Date(now.getTime() + 30 * 60000) // Current time + 30 minutes
+        const minBookingTime = new Date(now.getTime() + 10 * 60000) // Current time + 10 minutes
 
         if (selectedDateTime < minBookingTime) {
-          setError("Please select a time at least 30 minutes from now")
-          setIsSubmitting(false)
-          return
+          throw new Error("Please select a time at least 10 minutes from now")
         }
       }
 
@@ -191,7 +189,7 @@ const MeetingDialog = ({ mentor, onClose, onMeetingBooked }) => {
               />
               {meetingDate === currentDate && (
                 <p className="time-hint">
-                  <strong>Note:</strong> Earliest available time: {minTime} (30 minutes from now)
+                  <strong>Note:</strong> Earliest available time: {minTime} (10 minutes from now)
                 </p>
               )}
             </div>
