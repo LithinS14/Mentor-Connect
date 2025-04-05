@@ -7,81 +7,33 @@ const nodemailer = require("nodemailer")
 // Fetch student data by ID
 router.get("/student/:id", async (req, res) => {
   try {
-    console.log(`Attempting to fetch student with ID: ${req.params.id}`)
-
-    // Validate the ID format first
-    if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
-      return res.status(400).json({
-        message: "Invalid student ID format",
-        success: false,
-        fallbackData: {
-          firstName: "Unknown",
-          lastName: "Student",
-          educationLevel: "Not available",
-          currentSchool: "Not available",
-          areasOfInterest: ["Not available"],
-        },
+    const studentId = req.params.id
+    
+    if (!studentId) {
+      return res.status(400).json({ 
+        success: false, 
+        message: 'Student ID is required' 
       })
     }
 
-    const student = await Student.findById(req.params.id)
-
+    const student = await Student.findById(studentId)
+    
     if (!student) {
-      console.log(`Student not found with ID: ${req.params.id}`)
       return res.status(404).json({
-        message: "Student not found",
         success: false,
-        fallbackData: {
-          firstName: "Unknown",
-          lastName: "Student",
-          educationLevel: "Not available",
-          currentSchool: "Not available",
-          areasOfInterest: ["Not available"],
-        },
+        message: 'Student not found'
       })
     }
 
-    // Return student data without sensitive information
-    const safeStudentData = {
-      _id: student._id,
-      firstName: student.firstName,
-      lastName: student.lastName || "",
-      email: student.email,
-      age: student.age,
-      phoneNumber: student.phoneNumber,
-      educationLevel: student.educationLevel,
-      currentSchool: student.currentSchool,
-      goals: student.goals,
-      areasOfInterest: student.areasOfInterest,
-    }
-
-    res.json(safeStudentData)
-  } catch (err) {
-    console.error(`Error fetching student with ID ${req.params.id}:`, err)
-    // Check if error is due to invalid ObjectId format
-    if (err.name === "CastError" && err.kind === "ObjectId") {
-      return res.status(400).json({
-        message: "Invalid student ID format",
-        success: false,
-        fallbackData: {
-          firstName: "Unknown",
-          lastName: "Student",
-          educationLevel: "Not available",
-          currentSchool: "Not available",
-          areasOfInterest: ["Not available"],
-        },
-      })
-    }
+    res.json({
+      success: true,
+      student
+    })
+  } catch (error) {
+    console.error('Error fetching student:', error)
     res.status(500).json({
-      message: err.message,
       success: false,
-      fallbackData: {
-        firstName: "Unknown",
-        lastName: "Student",
-        educationLevel: "Not available",
-        currentSchool: "Not available",
-        areasOfInterest: ["Not available"],
-      },
+      message: 'Internal server error'
     })
   }
 })

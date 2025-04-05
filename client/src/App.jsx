@@ -6,7 +6,7 @@ import MentorAuth from "./auth/MentorAuth"
 import StudentHome from "./Home/StudentHome"
 import MentorHome from ".//Home/MentorHome"
 import "./App.css"
-import ErrorBoundary from "./Home/ErrorBoundary"
+import ErrorBoundary from ".//Home/ErrorBoundary"
 
 const App = () => {
   return (
