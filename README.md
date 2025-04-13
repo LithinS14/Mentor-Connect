@@ -20,20 +20,28 @@ Basic FAQ chatbot for common queries
 
 Frontend
 React.js
+
 CSS (custom styling)
+
 Axios for API calls
 
 Backend
 
 Node.js & Express.js
+
 MongoDB (with Mongoose)
+
 JSON Web Tokens (JWT) for authentication
+
 Bcrypt.js for password hashing
+
 Nodemailer for email notifications
 
 🚀 Getting Started
 
 Prerequisites
 Node.js (v16+)
+
 MongoDB (local or Atlas)
+
 Git
