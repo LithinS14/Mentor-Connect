@@ -3,7 +3,7 @@ A platform connecting students with mentors for personalized guidance and learni
 
 Developed by:
 
-Litin S
+Lithin S
 
 Pranav J
 
