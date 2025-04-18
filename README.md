@@ -1,4 +1,4 @@
-Mentor Connect
+Mentor Connect - 
 A platform connecting students with mentors for personalized guidance and learning.
 
 Developed by:
