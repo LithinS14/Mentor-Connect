@@ -91,10 +91,12 @@ EMAIL_PASS=your_email_app_password
 Start Backend Server
 
 cd server
+
 node server.js
 
 Start Frontend Development Server
 
 cd client
+
 npm run dev
 
