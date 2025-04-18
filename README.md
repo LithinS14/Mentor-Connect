@@ -1,47 +1,84 @@
-IQMath Technologies
-
 Mentor Connect
 A platform connecting students with mentors for personalized guidance and learning.
 
-Developed by: Litin S, Pranav J, Mohanraj M
+Developed by:
+
+Litin S
+
+Pranav J
+
+Mohanraj M
 
 ✨ Features
-User authentication for mentors and students
-
-Mentor search by expertise and availability
-
-Session booking system
-
-Email notifications using Nodemailer
-
-Basic FAQ chatbot for common queries
+✅ User Authentication – Secure login for mentors and students.
+🔍 Mentor Search – Filter mentors by expertise, availability, and ratings.
+📅 Session Booking – Schedule and manage mentoring sessions.
+📧 Email Notifications – Automated emails via Nodemailer for bookings & reminders.
+🤖 FAQ Chatbot – Basic AI chatbot for common queries.
 
 🛠 Tech Stack
-
 Frontend
-React.js
+React.js (Frontend framework)
 
-CSS (custom styling)
+CSS (Custom styling)
 
-Axios for API calls
+Axios (API calls)
 
 Backend
+Node.js & Express.js (Server & API)
 
-Node.js & Express.js
+MongoDB (Database with Mongoose ODM)
 
-MongoDB (with Mongoose)
+JWT (Authentication)
 
-JSON Web Tokens (JWT) for authentication
+Bcrypt.js (Password hashing)
 
-Bcrypt.js for password hashing
-
-Nodemailer for email notifications
+Nodemailer (Email notifications)
 
 🚀 Getting Started
-
 Prerequisites
-Node.js (v16+)
+Node.js (v16 or later)
 
-MongoDB (local or Atlas)
+MongoDB (Local or MongoDB Atlas)
 
 Git
+
+⚙️ Setup Instructions
+
+1. Clone the Repository
+
+git clone https://github.com/LithinS14/Mentor-Connect.git
+cd Mentor-Connect
+
+3. Install Dependencies (Frontend & Backend)
+
+Frontend Setup
+cd client
+npm install
+
+Backend Setup
+
+cd  server
+npm install
+
+4. Configure Environment Variables
+Create a .env file in the backend folder with:
+
+env
+MONGODB_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret_key
+EMAIL_USER=your_email@gmail.com
+EMAIL_PASS=your_email_app_password
+(For Gmail, enable App Passwords if using 2FA.)
+
+4. Run the Application
+Start Backend Server
+
+cd server
+node server.js
+
+Start Frontend Development Server
+
+cd client
+npm run dev
+
